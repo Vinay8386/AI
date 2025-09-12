@@ -1,0 +1,100 @@
+This exercise showed me the foundation of programmatic prompting — how to talk to an LLM directly through code.
+  -> How to structure messages (system, user, assistant) that guide the LLM’s behavior.
+  -> How to collect and pass messages to the OpenAI API.
+  -> How to use the OpenAI Java SDK to send prompts programmatically.
+  -> How to process the response and use it in my application.
+
+When we interact with an LLM, Structure of (System + User + Assistant) Message is very important because it helps the model to Stay in role (system), Understand what the user wants (user) and Remember the flow of the conversation (assistant).
+
+Step 1: System Message (Set the Stage):
+  -> This is like giving instructions before the conversation starts. Example: “You are an expert software engineer who prefers Java programming.” Now the model knows: “I should answer like a Java programming expert.”
+
+Step 2: User Message (Ask the Question):
+  -> This is the actual query/task you want solved.Example: Write a function to swap the keys and values in a dictionary. The model now answers according to the system instructions.
+
+Step 3: Assistant Message (The Model’s Reply):
+  -> The model generates the response: “Here is a functional programming style solution to swap keys and values…” If you want multi-turn conversation, you can feed this reply back into the next prompt.
+
+Note: Generally System Message is usually fixed (set once, per application or per API call). It defines the role/behavior of the AI. Example for a RAG-powered support bot:
+      messages.add(new Message("system", "You are a customer support assistant for XYZ company. " + "Always use the company’s knowledge base to answer questions. " + "If answer is not found, politely say 'I don’t know'."));
+      But User Message comes dynamically from the user (via UI, API request, or query parameter). User types in chatbox(prompt) or via api call.
+      In a RAG pipeline, before passing the user message to the LLM: 
+        -> Take the user’s query.
+        -> Search your vector DB / knowledge base.
+        -> Retrieve top N relevant documents.
+        -> Inject those into the user message content (or as context).
+
+So, Creating a Message class with role and content (like you already did) is a best practice for any AI-integrated application. Reason for seperate Message class:
+  -> Instead of passing raw strings everywhere, you know exactly who is speaking (system, user, assistant).
+  -> In simple apps you may only use system + user, but later when you add multi-turn chat, storing assistant replies becomes natural.
+  -> Tomorrow, if you need to add new fields like timestamp, messageId, contextDocs, or confidenceScore, you can easily extend the class.
+  -> Rag Compatibility: Retrieved documents can also be wrapped as special messages (e.g., role = system or context) so the LLM gets structured input.
+  -> Whether you’re building with Spring Boot, Flask, Node.js, etc., this structure works because OpenAI, Anthropic, and most LLM APIs already follow the chat format internally.
+
+Example Message Class (Reusable):
+
+  public class Message {
+  
+      private String role;
+      private String content;
+  
+      public Message(String role, String content) {
+          this.role = role;
+          this.content = content;
+      }
+  
+      public String getRole() {
+          return role;
+      }
+  
+      public String getContent() {
+          return content;
+      }
+  
+      public void setRole(String role) {
+          this.role = role;
+      }
+  
+      public void setContent(String content) {
+          this.content = content;
+      }
+  }
+
+Example Usage in an AI Application: 
+
+  List<Message> messages = new ArrayList<>();
+  
+  // App-level behavior
+  messages.add(new Message("system", 
+     "You are a customer support agent for XYZ bank. Always be concise."));
+  
+  // Dynamic user query (from UI or query param)
+  messages.add(new Message("user", 
+     "How can I reset my netbanking password?"));
+  
+  // Assistant’s reply (LLM-generated)
+  messages.add(new Message("assistant", 
+     "You can reset your password by clicking on 'Forgot Password'..."));
+
+=============================================================================================================================================================================================================================================================
+Two things we need to build an AI Agent:
+  -> Programmatic Prompting: Normally, you type a prompt into ChatGPT → get an answer → act on it manually.
+                            -> With programmatic prompting, your code does this automatically:
+                                  -> Sends a prompt to the model.
+                                  -> Receives the response.
+                                  -> Uses that response in the next step (like calling an API or making a decision).
+                            -> Think of it as automating the "ask → answer → act" cycle.
+                            -> Example: You ask ChatGPT manually: “Give me the weather in Delhi.”
+                                     With programmatic prompting, your program sends this prompt → gets back “It’s 32°C in Delhi” → and your program can then show it in a UI or call another function.
+
+  -> Memory Management: In a chat, ChatGPT remembers your last few questions. But in an agent, you decide what it should remember between steps. Why? Because not everything is needed. Keeping only the important context helps save cost and prevents confusion.
+                        Example: Suppose your agent asks an API for train timings.
+                                -> You want it to remember the API result so it can decide the next step.
+                                -> But you don’t want it to carry old irrelevant stuff like yesterday’s queries.
+                                -> This is what memory management means → deciding what to store and what to forget for the next step.
+
+The "Agent Loop" Imagine a cycle: Send prompt → Get response → Decide action → Store important info in memory → Repeat
+
+That’s the Agent Loop. It makes the AI feel “intelligent” because it’s not just answering once, but thinking, remembering, and acting step by step. In short:
+Programmatic prompting = Your code automatically asks/gets answers instead of you typing manually.
+Memory management = Choosing what the AI should remember from past steps so it can stay on track.
