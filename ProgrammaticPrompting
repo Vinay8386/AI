@@ -76,6 +76,25 @@ Example Usage in an AI Application:
   messages.add(new Message("assistant", 
      "You can reset your password by clicking on 'Forgot Password'..."));
 
+After preparing the messages, we need to call the LLM API. If we directly invoke the model inside our business logic, any future changes—like switching to a new model or supporting multiple models—would force us to modify the business logic itself. 
+To avoid this tight coupling, we create a separate abstraction layer (e.g., an LLMService class with a generateResponse() method). This way:
+  -> The business logic only deals with a clean interface (generateResponse(messages)), not with provider-specific SDKs or model names.
+  -> Provider Independence: If the model changes, or if we want to support multiple providers (OpenAI, Anthropic, Google, etc.), we only update this abstraction layer.
+  -> The rest of the application remains untouched, making it maintainable, flexible, and future-proof.
+  -> API Evolution Protection: LLM provider APIs frequently change. This abstraction insulates the rest of the codebase from these changes. If OpenAI deprecates an API or changes its data structures, we only need to update this single method.
+  -> Cost Control: We can easily implement fallback strategies, rate limiting, or routing logic to different models/providers based on cost or performance needs without affecting the consumer code.
+  -> Testing and Mocking: This approach makes testing significantly easier. We can mock this method with predictable responses for unit tests without needing to stub complex provider-specific APIs.
+  -> Observability: This centralized method provides a single point for adding logging, metrics, error handling, and monitoring for all LLM interactions.
+  -> Future-Proofing: As new LLM providers emerge or as we develop internal models, we can integrate them seamlessly by just adapting this method.
+  -> Example future extension:
+        if (useAnthropic) {
+            return AnthropicAdapter.generateResponse(messages);
+        } else if (useInternalModel) {
+            return InternalModelAdapter.generateResponse(messages);
+        } else {
+            // Current OpenAI implementation
+        }
+      
 =============================================================================================================================================================================================================================================================
 Two things we need to build an AI Agent:
   -> Programmatic Prompting: Normally, you type a prompt into ChatGPT → get an answer → act on it manually.
