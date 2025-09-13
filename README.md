@@ -1,2 +1,1 @@
-# Microservices
-This repository contain all the basic microservices
+1. Basics of AI
