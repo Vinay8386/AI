@@ -1,0 +1,53 @@
+When you build AI agents, you don’t just send plain text prompts like “write me a function”. Instead, you often need to send structured information (like JSON) so that the LLM can reason over it or take action.
+We will rely heavily on the ability to send the LLM just about any type of information, particularly JSON, when we start building agents. Because JSON (or Map in Java, which you convert to JSON) is how you tell the agent exactly what kind of response you want.
+
+In practice: For simple Q&A, plain text is enough. For agents that need structure, JSON (or another structured format) is the way to go.
+
+Think of it like this: If you send plain text → "Write a function to swap keys and values in a dictionary" The LLM will try, but it may not fully understand how you want the output. If you send structured info (Map → JSON) →
+  {
+    "name": "swap_keys_values",
+    "description": "Swaps the keys and values in a given dictionary.",
+    "params": { "d": "A dictionary with unique values." }
+  }
+Now the LLM has clear instructions about: 
+  1. Function name
+  2. What it should do
+  3. Expected parameters
+
+Example Code:
+  public class CodeGenerator {
+  
+      public static void main(String[] args) throws Exception {
+          LLM llm = new LLM();
+  
+          // Create code specification
+          Map<String, Object> codeSpec = new HashMap<>();
+          codeSpec.put("name", "swap_keys_values");
+          codeSpec.put("description", "Swaps the keys and values in a given dictionary.");
+  
+          Map<String, String> params = new HashMap<>();
+          params.put("d", "A dictionary with unique values.");
+          codeSpec.put("params", params);
+  
+          // Convert to JSON string
+          ObjectMapper mapper = new ObjectMapper();
+          String codeSpecJson = mapper.writeValueAsString(codeSpec);
+  
+          // Create messages using the Message class
+          List<Message> messages = new ArrayList<>();
+  
+          // Add system message
+          // Adjust this message if you want to focus on a specific programming language
+          messages.add(new Message("system",
+                  "You are an expert software engineer that writes clean functional code. " +
+                          "You always document your functions."));
+  
+          // Add user message
+          messages.add(new Message("user",
+                  "Please implement: " + codeSpecJson));
+  
+          // Generate response using the LLM instance
+          String response = llm.generateResponse(messages);
+          System.out.println(response);
+      }
+  }
