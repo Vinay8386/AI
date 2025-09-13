@@ -77,7 +77,13 @@ Example Usage in an AI Application:
      "You can reset your password by clicking on 'Forgot Password'..."));
 
 After preparing the messages, we need to call the LLM API. If we directly invoke the model inside our business logic, any future changes—like switching to a new model or supporting multiple models—would force us to modify the business logic itself. 
-To avoid this tight coupling, we create a separate abstraction layer (e.g., an LLMService class with a generateResponse() method). This way:
+When building AI applications, one of the most important architectural decisions is creating an abstraction layer between your application and the LLM provider. Let’s examine why this pattern is crucial for maintainable and flexible code.
+If we directly use provider-specific APIs throughout our codebase, we create tight coupling that leads to several problems:
+  -> Vendor Lock-in: Every part of your code becomes dependent on a specific provider’s implementation details
+  -> API Changes Break Everything: When the provider updates their API, you need to modify code across your entire application
+  -> Testing Challenges: Provider-specific mocks are complex to create and maintain
+  -> No Flexibility: Switching providers or using multiple providers becomes a major refactoring effort
+To avoid this tight coupling, we create a separate abstraction layer (e.g., an LLMService/LLM class with a generateResponse() method). This way:
   -> The business logic only deals with a clean interface (generateResponse(messages)), not with provider-specific SDKs or model names.
   -> Provider Independence: If the model changes, or if we want to support multiple providers (OpenAI, Anthropic, Google, etc.), we only update this abstraction layer.
   -> The rest of the application remains untouched, making it maintainable, flexible, and future-proof.
@@ -94,7 +100,46 @@ To avoid this tight coupling, we create a separate abstraction layer (e.g., an L
         } else {
             // Current OpenAI implementation
         }
+  -> LLM Abstraction Solution:
+      public class LLM {
+          public String generateResponse(List<Message> messages) {
+              // Initialize OpenAI client using environment variables or you can also set manually 
+              OpenAIClient client = OpenAIOkHttpClient.fromEnv();
       
+              // Transform custom Message objects to OpenAI's ChatCompletionMessageParam objects
+              ChatCompletionCreateParams.Builder paramsBuilder = ChatCompletionCreateParams.builder()
+                      .model(ChatModel.GPT_4O_MINI)
+                      .maxCompletionTokens(1024);
+      
+              // Add messages individually to the builder
+              for (Message message : messages) {
+                  if (message.getRole().equals("system")) {
+                      ChatCompletionSystemMessageParam systemMsg = ChatCompletionSystemMessageParam.builder()
+                              .content(message.getContent())
+                              .build();
+                      paramsBuilder.addMessage(systemMsg);
+                  } else if (message.getRole().equals("user")) {
+                      ChatCompletionUserMessageParam userMsg = ChatCompletionUserMessageParam.builder()
+                              .content(message.getContent())
+                              .build();
+                      paramsBuilder.addMessage(userMsg);
+                  } else {
+                      // For assistant or other roles, use ChatCompletionAssistantMessageParam
+                      ChatCompletionAssistantMessageParam assistantMsg = ChatCompletionAssistantMessageParam.builder()
+                              .content(message.getContent())
+                              .build();
+                      paramsBuilder.addMessage(assistantMsg);
+                  }
+              }
+      
+              // Get completion response
+              ChatCompletion completion = client.chat().completions().create(paramsBuilder.build());
+      
+              // Return content from first choice
+              return completion.choices().get(0).message().content().get();
+          }
+      
+      }
 =============================================================================================================================================================================================================================================================
 Two things we need to build an AI Agent:
   -> Programmatic Prompting: Normally, you type a prompt into ChatGPT → get an answer → act on it manually.
