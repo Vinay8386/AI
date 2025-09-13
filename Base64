@@ -1,0 +1,41 @@
+Official Documentation:
+  -> https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Base64.html
+  -> https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Base64.Encoder.html
+  -> https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/util/Base64.Decoder.html
+
+Base64 & Serialization vs Encoding vs Encryption — What’s the Difference?
+  -> What is a Base64 Encoded String?
+    -> Base64 is not encryption, it’s encoding. It’s a method to represent binary data (like images, files, or raw bytes) using only printable characters. We need it because many systems are text-based (like JSON, XML, or email), and binary data can’t be transmitted safely without encoding.
+    -> How it works:
+       1️⃣ Take the binary input (e.g., file, text, or image).
+       2️⃣ Split into 3-byte (24-bit) chunks.
+       3️⃣ Break into 4 groups of 6 bits.
+       4️⃣ Map each 6-bit value to a Base64 character.
+       5️⃣ If the data isn’t a multiple of 3, padding = is added.
+    -> Example: Suppose we encode the text: Hello
+      1. ASCII values: H = 72, e = 101, l = 108, l = 108, o = 111
+      2. Binary representation: 01001000 01100101 01101100 01101100 01101111
+      3. Break into 6-bit groups: 010010 000110 010101 101100 011011 000110 1111
+      4. Map to Base64 characters: SGVsbG8=
+
+  -> Serialization: Converts an object’s state into bytes (or text) so it can be stored or transmitted. Example: Java Serializable, JSON, Protocol Buffers.
+  -> Encoding: Converts data into another format for compatibility or safe transmission. Example: Base64 encoding (binary → ASCII text). Purpose: Make data portable, not secret.
+  -> Encryption: Converts data into unreadable form to prevent unauthorized access. Purpose: Security & confidentiality.
+
+Serialization is not just encoding — it’s about converting an object into a byte representation. But after serialization, we often use encoding (like Base64) to make the serialized data transferable over text-only mediums.
+You may serialize an object, then encode it with Base64, and finally encrypt it before sending it over a network!
+
+Practical Example : Gen AI + Base64 Encoding: Suppose you’re building a Gen AI / Agentic AI application that generates source code snippets. You want to send the AI response safely over an API (text-only format like JSON).
+  Code:
+  public static void processAIResponse(String aiResponse) {
+     // Step 2: Normal ai response
+     System.out.println("🔹 Raw AI Response: " + aiResponse);
+    
+     // Step 2: Encode the AI response using Base64
+     String encodedResponse = Base64.getEncoder().encodeToString(aiResponse.getBytes());
+     System.out.println("Base64 Encoded Response: " + encodedResponse);
+    
+     // Step 3: Decode it back (simulate retrieval in Agentic workflow)
+     String decodedResponse = new String(Base64.getDecoder().decode(encodedResponse));
+     System.out.println("Decoded Back: " + decodedResponse);
+  }
