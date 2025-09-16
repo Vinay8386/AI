@@ -1,0 +1,5 @@
+GAIL: System Message(GAL) and User Message(I) 
+ -> G: Goal : Define what you want to achieve. Example: “Find the list of files and summarize their contents.”
+ -> A: Action : Specify how the system or agent should proceed. Example: “Use listFiles() first, then call readFile() if needed.”
+ -> I: Information : Provide context, data, or constraints the model needs. Example: “The files are in the current working directory.”
+ -> L: Language : Set the tone, style, or format of the response. Example: “Always respond in JSON with toolName and args.”
