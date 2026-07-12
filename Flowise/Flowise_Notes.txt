@@ -1,0 +1,173 @@
+=> Flowise Details
+
+    -> What is Flowise
+
+        -> Flowise is an open-source visual AI orchestration platform.
+        -> It allows us to build LLM applications by connecting reusable AI components visually.
+        -> Instead of writing code, we create workflows using drag-and-drop Nodes.
+        -> It is built on top of LangChain and LangGraph.
+
+    -> How to Create AI Applications
+
+        -> Flowise provides two ways to build AI applications.
+
+            -> Chatflows
+
+                -> Built on LangChain.
+                -> Best suited for single-agent applications.
+                -> Used for:
+                    -> AI Chatbots
+                    -> Question Answering
+                    -> RAG Applications
+                    -> PDF Chat
+                    -> Knowledge Assistants
+                -> Easier to learn and suitable for most AI use cases.
+
+            -> Agentflows
+
+                -> Built on LangGraph.
+                -> Best suited for multi-agent and complex workflows.
+                -> Supports:
+                    -> Conditional Logic
+                    -> Branching
+                    -> Loops
+                    -> Parallel Execution
+                    -> Human-in-the-Loop
+                -> Used for production-grade autonomous AI agents.
+
+    -> Flowise Architecture
+
+            LangChain / LangGraph
+                    ↓
+        Provides Reusable AI Components
+                    ↓
+            Flowise exposes them as Nodes
+                    ↓
+            Connect Nodes visually
+                    ↓
+            AI Application is created
+
+    -> Flowise and LangChain
+
+        -> LangChain is an open-source framework for building LLM applications.
+        -> It provides reusable AI components such as Prompt, Memory, Retriever, Tools, and Chains.
+        -> Flowise is built on top of LangChain.
+        -> Every LangChain Component is represented as a Flowise Node.
+
+    -> Example
+
+            User Input
+                    ↓
+            Prompt Template
+                    ↓
+            Chat Model
+                    ↓
+            LLM Chain
+                    ↓
+            Response
+
+        -> Every box in the workflow represents a Flowise Node.
+        -> Every Flowise Node internally represents a LangChain Component.
+
+    -> Node Categories
+
+        -> Agents
+            -> Build AI agents capable of reasoning, planning, and using tools.
+
+        -> Cache
+            -> Store previous LLM responses to improve performance and reduce API cost.
+
+        -> Chains
+            -> Connect multiple AI components into a workflow.
+
+        -> Chat Models
+            -> Connect with chat-based LLMs.
+
+        -> Document Loaders
+            -> Load documents from different sources.
+
+        -> Embeddings
+            -> Convert text into vector representations.
+
+        -> Graph
+            -> Build and query Knowledge Graphs.
+
+        -> LLMs
+            -> Traditional completion-based language models.
+
+        -> Memory
+            -> Maintain conversation history and application state.
+
+        -> Moderation
+            -> Detect harmful or unsafe content.
+
+        -> Output Parsers
+            -> Convert LLM responses into structured output.
+
+        -> Prompts
+            -> Create reusable prompt templates.
+
+        -> Record Manager
+            -> Manage document indexing and synchronization.
+
+        -> Retrievers
+            -> Retrieve relevant documents from a Vector Store.
+
+        -> Text Splitters
+            -> Split large documents into smaller chunks.
+
+        -> Tools
+            -> Connect external APIs, databases, calculators, search engines, etc.
+
+        -> Tools (MCP)
+            -> Connect external applications using the Model Context Protocol.
+
+        -> Vector Stores
+            -> Store and retrieve embeddings for semantic search.
+
+    -> Supported LLM Providers
+
+        -> OpenAI
+        -> Google Gemini
+        -> Anthropic Claude
+        -> Ollama
+        -> Azure OpenAI
+        -> AWS Bedrock
+        -> Hugging Face
+        -> Mistral AI
+        -> Groq
+        -> Together AI
+
+    -> Why Use Flowise
+
+        -> Low-code visual development.
+        -> Rapid AI application development.
+        -> Built-in support for RAG.
+        -> Built-in Agent support.
+        -> Easy integration with multiple LLM providers.
+        -> Supports APIs, databases, Vector Stores, Memory, and Tools.
+        -> Suitable for both learning and production applications.
+
+    -> Advantages
+
+        -> Faster development than manual coding.
+        -> Visual representation of the workflow.
+        -> Reusable components.
+        -> Easy debugging.
+        -> Supports LangChain and LangGraph.
+        -> Large collection of built-in integrations.
+
+    -> Limitations
+
+        -> Limited customization compared to writing code.
+        -> Complex workflows can become difficult to maintain visually.
+        -> Large enterprise projects may eventually require manual implementation.
+
+    -> Important
+
+        -> Flowise is built on top of LangChain and LangGraph.
+        -> Every Flowise Node represents a reusable AI component.
+        -> We build AI applications by connecting Nodes together.
+        -> Chatflows are recommended for most AI applications.
+        -> Agentflows are recommended for complex multi-agent workflows.
+        -> Understanding Flowise makes it easier to implement the same application using Spring AI or LangChain later.

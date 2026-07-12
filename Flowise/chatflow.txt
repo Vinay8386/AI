@@ -1,0 +1,99 @@
+=> Chatflow
+
+    ====================================! Task 1: Create our first Chatflow !=======================
+    Objective:
+        -> Build a basic AI application by connecting a Chat Prompt Template, Chat Model, and LLM Chain.
+        -> Understand how Flowise visually represents the components used in manual AI application development.
+
+    -> Definition
+
+        -> Chatflow is a visual workflow used to build AI applications in Flowise.
+        -> It is built on top of LangChain.
+        -> Instead of writing code, we connect different LangChain Components (Nodes) visually.
+        -> Each Node performs a specific responsibility, and together they form a complete AI application.
+
+    -> Architecture
+
+            User
+                ↓
+        Chat Prompt Template
+                ↓
+            LLM Chain
+              ↑
+              │
+          Chat Model
+                ↓
+            LLM Response
+
+    -> Components
+
+        -> Chat Prompt Template
+            -> Creates the final prompt by combining the System Message and Human Message.
+
+        -> Chat Model
+            -> Acts as the communication bridge between the application and the selected LLM.
+
+        -> LLM Chain
+            -> Receives the Prompt and Chat Model.
+            -> Invokes the selected LLM.
+            -> Returns the generated response.
+
+    -> Execution Flow
+
+            User enters a question
+                    ↓
+            Chat Prompt Template combines:
+                -> System Message
+                -> Human Message
+                    ↓
+            Final Prompt is created
+                    ↓
+            LLM Chain receives:
+                -> Final Prompt
+                -> Chat Model
+                    ↓
+            Chat Model sends the request to the configured LLM
+                    ↓
+            LLM generates the response
+                    ↓
+            LLM Chain returns the response
+                    ↓
+            Response is displayed to the user
+
+    -> Current Chatflow
+
+            Chat Prompt Template
+                        ↓
+                    LLM Chain
+                      ↑
+                      │
+                Google Gemini
+
+    -> Use Cases
+
+        -> AI Chatbot
+        -> Question Answering
+        -> RAG Applications
+        -> PDF Chat
+        -> Knowledge Assistant
+        -> Customer Support Bot
+
+    -> Limitations
+
+        -> Best suited for single-agent applications.
+        -> Limited support for complex branching and multi-agent workflows.
+        -> For advanced AI applications, Agentflow is recommended.
+
+    -> Important
+
+        -> Chatflow is built on top of LangChain.
+        -> Every Node represents a LangChain Component.
+        -> We build an AI application by connecting the required Nodes together.
+        -> The Chat Prompt Template prepares the prompt.
+        -> The Chat Model communicates with the selected LLM.
+        -> The LLM Chain orchestrates the complete execution flow.
+
+====================================! Task 2: Add Memory to Chatflow !=======================
+    Objective:
+        -> Enable the Chatflow to remember previous conversations.
+        -> Understand how conversation history is maintained and how it improves contextual responses.

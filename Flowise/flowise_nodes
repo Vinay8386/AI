@@ -1,0 +1,120 @@
+=> Chat Model
+
+    -> Purpose
+
+        -> The Chat Model is responsible for communicating with the selected LLM.
+        -> It receives the user's prompt, sends it to the selected LLM, and returns the generated response.
+        -> It does not maintain memory, load documents, use tools, or perform reasoning.
+        -> Its only responsibility is to interact with the selected LLM.
+
+    -> Configuration
+
+        -> Credential
+            -> API Key used to authenticate with the LLM provider.
+
+        -> Model Name
+            -> Specifies which model should process the request.
+
+            -> Examples
+                -> gemini-2.5-flash
+                -> gpt-4.1
+                -> claude-3.5-sonnet
+
+        -> Temperature
+            -> Controls the randomness and creativity of the generated response.
+
+        -> Additional Parameters
+
+            -> Max Tokens
+            -> Top-P
+            -> Top-K
+            -> Frequency Penalty
+            -> Presence Penalty
+
+    -> Flow
+
+            User Prompt
+                ↓
+            Chat Model
+                ↓
+            LLM Provider API
+                ↓
+            Selected LLM
+                ↓
+            Response
+
+    -> Important
+
+        -> A Chat Model only communicates with the LLM.
+        -> It does not manage prompts, memory, tools, or RAG.
+
+=> Chat Prompt Template
+
+    -> Purpose
+
+        -> Creates the final prompt that will be sent to the LLM.
+        -> Combines the System Message and Human Message into a single prompt.
+        -> It does not communicate with the LLM directly.
+
+    -> Components
+
+        -> System Message
+
+            -> Defines the behavior or personality of the AI.
+
+            -> Examples
+
+                -> You are a Java Expert.
+                -> Answer only in JSON.
+                -> You are a Travel Assistant.
+
+        -> Human Message
+
+            -> Represents the user's actual input.
+
+            -> Examples
+
+                -> What is Spring Boot?
+                -> Explain Docker Volumes.
+
+    -> Flow
+
+            System Message
+                    +
+            Human Message
+                    ↓
+            Final Prompt
+                    ↓
+            Send to LLM Chain
+
+    -> Important
+
+        -> The Prompt Template only prepares the prompt.
+        -> It never communicates directly with the LLM.
+
+=> LLM Chain
+
+    -> Purpose
+
+        -> Acts as the orchestrator between the Prompt Template and the Chat Model.
+        -> Receives the Prompt from the Chat Prompt Template.
+        -> Receives the configured Chat Model.
+        -> Invokes the selected LLM.
+        -> Returns the generated response.
+
+    -> Flow
+
+            Chat Prompt Template
+                    +
+            Chat Model
+                    ↓
+                LLM Chain
+                    ↓
+            Invoke Selected LLM
+                    ↓
+            Return Response
+
+    -> Important
+
+        -> The LLM Chain coordinates the execution.
+        -> It combines the Prompt and Chat Model to generate the final response.

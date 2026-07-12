@@ -1,0 +1,147 @@
+=> Chat Model
+
+    -> Purpose
+
+        -> Configures the Chat Model used to communicate with the selected LLM.
+        -> The same configuration exists in both Flowise and manual implementation.
+
+    -> Flowise
+
+        Chat Model Node
+                ↓
+        Configure
+
+            -> API Key
+            -> Model Name
+            -> Temperature
+
+    -> Spring AI
+
+        ChatModel Bean
+                ↓
+        Configure
+
+            -> API Key
+            -> Model Name
+            -> Temperature
+
+    -> LangChain4j
+
+        ChatLanguageModel
+                ↓
+        Configure
+
+            -> API Key
+            -> Model Name
+            -> Temperature
+
+    -> Mapping
+
+        Flowise Chat Model Node
+                    ⇔
+        Spring AI ChatModel Bean
+                    ⇔
+        LangChain4j ChatLanguageModel
+
+    -> Important
+
+        -> Flowise configures the Chat Model visually.
+        -> Manual implementation configures the same Chat Model in code.
+        -> The Chat Model acts as the communication bridge between the application and the LLM.
+
+=> Chat Prompt Template
+
+    -> Purpose
+
+        -> Creates the final prompt before sending it to the LLM.
+        -> Combines the System Message and Human Message.
+
+    -> Flowise
+
+        Chat Prompt Template Node
+
+    -> Spring AI
+
+        Prompt
+
+    -> LangChain4j
+
+        PromptTemplate
+
+    -> Mapping
+
+        Flowise Chat Prompt Template
+                    ⇔
+        Spring AI Prompt
+                    ⇔
+        LangChain4j PromptTemplate
+
+    -> Important
+
+        -> Flowise creates the prompt visually.
+        -> Manual implementation creates the same prompt in code before invoking the Chat Model.
+
+=> LLM Chain
+
+    -> Purpose
+
+        -> Orchestrates the interaction between the Prompt and the Chat Model.
+        -> Invokes the selected LLM and returns the generated response.
+
+    -> Flowise
+
+            Chat Prompt Template
+                        ↓
+                    LLM Chain
+                      ↑
+                      │
+                Chat Model
+
+    -> Spring AI
+
+            Prompt
+                ↓
+            ChatClient
+                ↓
+            ChatModel
+                ↓
+            call()
+                ↓
+            Response
+
+    -> LangChain4j
+
+            Prompt
+                ↓
+        ChatLanguageModel
+                ↓
+        AiServices / LLM Chain
+                ↓
+            Response
+
+    -> Mapping
+
+        Flowise Chat Prompt Template
+                    ⇔
+        Spring AI Prompt
+                    ⇔
+        LangChain4j PromptTemplate
+
+        Flowise Chat Model
+                    ⇔
+        Spring AI ChatModel Bean
+                    ⇔
+        LangChain4j ChatLanguageModel
+
+        Flowise LLM Chain
+                    ⇔
+        Spring AI ChatClient
+                    ⇔
+        LangChain4j AiServices / LLM Chain
+
+    -> Important
+
+        -> Flowise exposes the orchestration as an LLM Chain node.
+        -> In Spring AI, the orchestration is handled internally by the ChatClient.
+        -> In LangChain4j, the orchestration is handled by AiServices or an LLM Chain.
+        -> The execution flow remains the same; only the implementation differs.
