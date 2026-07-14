@@ -145,3 +145,129 @@
         -> In Spring AI, the orchestration is handled internally by the ChatClient.
         -> In LangChain4j, the orchestration is handled by AiServices or an LLM Chain.
         -> The execution flow remains the same; only the implementation differs.
+
+=> Buffer Memory
+
+    -> Purpose
+
+        -> Stores the conversation history between the user and the AI.
+        -> Enables the AI to remember previous interactions.
+        -> Provides conversation history to the Conversation Chain.
+
+    -> Flowise
+
+            User Message
+                    ↓
+            Buffer Memory
+                    ↓
+        Conversation History
+
+    -> Spring AI
+
+            ChatMemory
+
+    -> LangChain4j
+
+            ChatMemory
+
+    -> Mapping
+
+        Flowise Buffer Memory
+                    ⇔
+        Spring AI ChatMemory
+                    ⇔
+        LangChain4j ChatMemory
+
+    -> Important
+
+        -> Buffer Memory only stores and retrieves conversation history.
+        -> It does not communicate directly with the Chat Model.
+        -> It is used by Conversation Chain to generate context-aware responses.
+
+=> Conversation Chain
+
+    -> Purpose
+
+        -> Creates a stateful AI chatbot.
+        -> Retrieves conversation history from Buffer Memory.
+        -> Internally builds the final prompt.
+        -> Invokes the Chat Model.
+        -> Updates Buffer Memory after generating the response.
+
+    -> Flowise
+
+                Buffer Memory
+                      │
+                      ▼
+            Conversation Chain
+                  ▲
+                  │
+              Chat Model
+
+    -> Spring AI
+
+            ChatMemory
+                  │
+                  ▼
+            PromptTemplate
+                  ↓
+              ChatClient
+                  ↓
+              ChatModel
+                  ↓
+              Response
+
+    -> LangChain4j
+
+            ChatMemory
+                  │
+                  ▼
+            PromptTemplate
+                  ↓
+            AiServices
+                  ↓
+        ChatLanguageModel
+                  ↓
+              Response
+
+    -> Internal Working
+
+            User Message
+                    +
+            System Prompt
+                    +
+            Conversation History
+                    ↓
+            Internal Chat Prompt Template
+                    ↓
+                Chat Model
+                    ↓
+                LLM Response
+                    ↓
+            Update Buffer Memory
+
+    -> Mapping
+
+        Flowise Conversation Chain
+                    ⇔
+        Spring AI
+            ChatClient
+                +
+            PromptTemplate
+                +
+            ChatMemory
+
+                    ⇔
+        LangChain4j
+            AiServices
+                +
+            PromptTemplate
+                +
+            ChatMemory
+
+    -> Important
+
+        -> Conversation Chain internally creates the Chat Prompt Template.
+        -> Unlike LLM Chain, it supports Memory.
+        -> It hides the complete orchestration from the developer.
+        -> If we implement it manually, we need to explicitly manage PromptTemplate, ChatMemory and ChatClient.

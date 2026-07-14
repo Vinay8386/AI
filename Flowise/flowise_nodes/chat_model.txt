@@ -1,0 +1,49 @@
+=> Chat Model
+
+    -> Purpose
+
+        -> The Chat Model is responsible for communicating with the selected LLM.
+        -> It receives the user's prompt, sends it to the selected LLM, and returns the generated response.
+        -> It does not maintain memory, load documents, use tools, or perform reasoning.
+        -> Its only responsibility is to interact with the selected LLM.
+
+    -> Configuration
+
+        -> Credential
+            -> API Key used to authenticate with the LLM provider.
+
+        -> Model Name
+            -> Specifies which model should process the request.
+
+            -> Examples
+                -> gemini-2.5-flash
+                -> gpt-4.1
+                -> claude-3.5-sonnet
+
+        -> Temperature
+            -> Controls the randomness and creativity of the generated response.
+
+        -> Additional Parameters
+
+            -> Max Tokens
+            -> Top-P
+            -> Top-K
+            -> Frequency Penalty
+            -> Presence Penalty
+
+    -> Flow
+
+            User Prompt
+                ↓
+            Chat Model
+                ↓
+            LLM Provider API
+                ↓
+            Selected LLM
+                ↓
+            Response
+
+    -> Important
+
+        -> A Chat Model only communicates with the LLM.
+        -> It does not manage prompts, memory, tools, or RAG.

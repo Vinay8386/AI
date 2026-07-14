@@ -1,0 +1,33 @@
+=> LLM Chain
+
+    -> Purpose
+
+        -> Acts as the orchestrator between the Prompt Template and the Chat Model.
+        -> Receives the Prompt from the Chat Prompt Template.
+        -> Receives the configured Chat Model.
+        -> Invokes the selected LLM.
+        -> Returns the generated response.
+
+    -> Flow
+
+            Chat Prompt Template
+                    +
+            Chat Model
+                    ↓
+                LLM Chain
+                    ↓
+            Invoke Selected LLM
+                    ↓
+            Return Response
+
+    -> Features:
+        -> chat model
+        -> Prompt
+
+    -> Does NOT support:
+        -> Memory
+
+    -> Important
+
+        -> The LLM Chain coordinates the execution.
+        -> It combines the Prompt and Chat Model to generate the final response.

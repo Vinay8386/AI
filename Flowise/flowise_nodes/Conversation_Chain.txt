@@ -1,0 +1,49 @@
+=> Conversation Chain
+
+    -> Purpose
+
+        -> Conversation Chain is responsible for orchestrating a complete conversation.
+        -> It retrieves conversation history from Buffer Memory.
+        -> It internally creates the final prompt.
+        -> It invokes the selected Chat Model.
+        -> It stores the latest conversation back into Buffer Memory.
+
+    -> Configuration
+
+        -> Chat Model
+            -> Specifies which Chat Model should be used.
+
+        -> Memory
+            -> Specifies which Memory implementation should be used.
+
+        -> System Message
+            -> Defines the behaviour of the AI Assistant.
+
+        -> Additional Parameters
+
+            -> Input Moderation
+            -> Conversation Settings
+            -> Other chain-related configurations
+
+    -> Flow
+
+            User Message
+                ↓
+        Retrieve Conversation History
+                ↓
+        Create Final Prompt
+                ↓
+            Chat Model
+                ↓
+            Selected LLM
+                ↓
+        Generate Response
+                ↓
+        Update Buffer Memory
+
+    -> Important
+
+        -> Conversation Chain supports conversational memory.
+        -> It internally creates the Chat Prompt Template.
+        -> It hides the orchestration from the developer.
+        -> Unlike LLM Chain, it supports Memory.

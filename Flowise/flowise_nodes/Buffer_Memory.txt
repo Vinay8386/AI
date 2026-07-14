@@ -1,0 +1,39 @@
+=> Buffer Memory
+
+    -> Purpose
+
+        -> Buffer Memory stores the conversation history between the user and the AI.
+        -> It enables the AI to remember previous interactions.
+        -> It provides the conversation history whenever it is requested by the Conversation Chain.
+        -> It does not communicate directly with the Chat Model.
+
+    -> Configuration
+
+        -> Memory Type
+            -> Buffer Memory
+
+        -> Additional Parameters
+
+            -> Session Id
+            -> Memory Key
+            -> Return Messages
+            -> Other memory-related configurations (depending on the implementation)
+
+    -> Flow
+
+            User Message
+                ↓
+            Buffer Memory
+                ↓
+        Store Conversation History
+                ↓
+        Conversation Chain requests History
+                ↓
+        Return Conversation History
+
+    -> Important
+
+        -> Buffer Memory only stores and retrieves conversation history.
+        -> It does not invoke the LLM.
+        -> It does not generate prompts.
+        -> It works together with the Conversation Chain.

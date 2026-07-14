@@ -1,6 +1,5 @@
-=> Chatflow
+====================================! Task 1: Create our first Chatflow !=======================
 
-    ====================================! Task 1: Create our first Chatflow !=======================
     Objective:
         -> Build a basic AI application by connecting a Chat Prompt Template, Chat Model, and LLM Chain.
         -> Understand how Flowise visually represents the components used in manual AI application development.
@@ -94,6 +93,240 @@
         -> The LLM Chain orchestrates the complete execution flow.
 
 ====================================! Task 2: Add Memory to Chatflow !=======================
+
     Objective:
+
         -> Enable the Chatflow to remember previous conversations.
         -> Understand how conversation history is maintained and how it improves contextual responses.
+
+    -> Why Conversation Chain?
+
+        -> In Task 1, we used LLM Chain to execute a single prompt.
+        -> LLM Chain is a stateless chain, meaning it does not remember previous conversations.
+        -> Therefore, it cannot be directly used with Buffer Memory.
+        -> To build a conversational AI application, Flowise provides Conversation Chain.
+        -> Conversation Chain internally manages:
+            -> Conversation History
+            -> Prompt Creation
+            -> Chat Model Invocation
+
+    -> Architecture
+
+                Buffer Memory
+                      │
+                      ▼
+            Conversation Chain
+                  ▲
+                  │
+              Chat Model
+
+    -> Components
+
+        -> Buffer Memory
+            -> Stores the conversation history.
+            -> Retrieves previous conversations whenever requested.
+
+        -> Conversation Chain
+            -> Retrieves conversation history from Buffer Memory.
+            -> Internally creates the final Prompt.
+            -> Invokes the selected Chat Model.
+            -> Stores the latest conversation back into Buffer Memory.
+
+        -> Chat Model
+            -> Communicates with the selected LLM.
+            -> Generates the final response.
+
+    -> Execution Flow
+
+            User enters a question
+                    ↓
+            Buffer Memory retrieves previous conversation
+                    ↓
+            Conversation Chain internally combines:
+                -> System Prompt
+                -> Conversation History
+                -> Current User Prompt
+                    ↓
+            Final Prompt is created
+                    ↓
+            Chat Model sends the request to the configured LLM
+                    ↓
+            LLM generates the response
+                    ↓
+            Conversation Chain returns the response
+                    ↓
+            Buffer Memory stores the latest conversation
+
+    -> Current Chatflow
+
+                Buffer Memory
+                      │
+                      ▼
+            Conversation Chain
+                  ▲
+                  │
+                OpenAI
+
+    -> Difference from Task 1
+
+        Task 1
+
+            Chat Prompt Template
+                    ↓
+                LLM Chain
+                  ↑
+                  │
+              Chat Model
+
+            -> Stateless Chatflow.
+            -> Every request is processed independently.
+            -> Previous conversations are not remembered.
+
+        Task 2
+
+                Buffer Memory
+                      │
+                      ▼
+            Conversation Chain
+                  ▲
+                  │
+              Chat Model
+
+            -> Stateful Chatflow.
+            -> Previous conversations are remembered.
+            -> Conversation context is automatically included in every request.
+
+    -> Important
+
+        -> Buffer Memory stores only the conversation history.
+        -> Conversation Chain automatically retrieves conversation history from Buffer Memory.
+        -> Conversation Chain internally creates the Chat Prompt Template.
+        -> Unlike LLM Chain, Conversation Chain supports Memory.
+        -> Flowise hides the prompt creation process inside Conversation Chain.
+        -> In manual implementation (Spring AI / LangChain4j), we create the Prompt, retrieve Memory, and invoke the Chat Model explicitly.
+        
+====================================! Task 3: Add Output Parser !=======================
+
+    Objective:
+
+        -> Force the LLM to return responses in a predefined format.
+        -> Understand how structured outputs improve application reliability.
+
+====================================! Task 4: Add Prompt Variables !=======================
+
+    Objective:
+
+        -> Create dynamic prompts using variables.
+        -> Understand how Prompt Templates become reusable across multiple requests.
+
+====================================! Task 5: Connect Multiple Prompts !=======================
+
+    Objective:
+
+        -> Learn how prompts can be chained together.
+        -> Understand multi-step prompt execution.
+
+====================================! Task 6: Add Moderation !=======================
+
+    Objective:
+
+        -> Validate user input before sending it to the LLM.
+        -> Prevent harmful or restricted requests.
+
+====================================! Task 7: Load External Documents !=======================
+
+    Objective:
+
+        -> Read documents such as PDF, DOCX, TXT, or CSV.
+        -> Understand how AI applications ingest external knowledge.
+
+====================================! Task 8: Split Documents !=======================
+
+    Objective:
+
+        -> Split large documents into smaller chunks.
+        -> Understand why chunking is essential for embeddings and RAG.
+
+====================================! Task 9: Generate Embeddings !=======================
+
+    Objective:
+
+        -> Convert text into vector representations.
+        -> Understand how semantic search works.
+
+====================================! Task 10: Store Embeddings in Vector Database !=======================
+
+    Objective:
+
+        -> Store document embeddings inside a Vector Store.
+        -> Understand vector indexing and similarity search.
+
+====================================! Task 11: Build our First RAG Application !=======================
+
+    Objective:
+
+        -> Retrieve relevant information from the Vector Database.
+        -> Generate answers grounded in external knowledge.
+
+====================================! Task 12: Add Conversation Memory to RAG !=======================
+
+    Objective:
+
+        -> Combine document retrieval with conversational memory.
+        -> Build a context-aware RAG chatbot.
+
+====================================! Task 13: Add Tools !=======================
+
+    Objective:
+
+        -> Enable the AI to use external tools.
+        -> Understand how LLMs interact with APIs and external systems.
+
+====================================! Task 14: MCP Integration !=======================
+
+    Objective:
+
+        -> Connect AI applications with MCP servers.
+        -> Understand standardized tool communication.
+
+====================================! Task 15: Build our First AI Agent !=======================
+
+    Objective:
+
+        -> Create an autonomous AI Agent capable of reasoning and tool usage.
+        -> Understand the difference between Chatflow and AI Agents.
+
+====================================! Task 16: Multi-Tool AI Agent !=======================
+
+    Objective:
+
+        -> Enable an AI Agent to select and use multiple tools dynamically.
+        -> Understand agent planning and tool selection.
+
+====================================! Task 17: Multi-Agent Workflow !=======================
+
+    Objective:
+
+        -> Build applications using multiple collaborating AI Agents.
+        -> Understand agent orchestration and task delegation.
+
+====================================! Task 18: Human-in-the-Loop !=======================
+
+    Objective:
+
+        -> Introduce manual approval into AI workflows.
+        -> Understand where human intervention is required.
+
+====================================! Task 19: Build End-to-End Production AI Application !=======================
+
+    Objective:
+
+        -> Combine Memory, RAG, Tools, MCP, and AI Agents.
+        -> Build a complete production-grade AI application in Flowise.
+
+====================================! Task 20: Manual Implementation !=======================
+
+    Objective:
+
+        -> Implement the complete application manually using Spring AI and LangChain4j.
+        -> Understand how every Flowise component maps to production Java code.
