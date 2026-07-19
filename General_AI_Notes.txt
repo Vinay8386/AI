@@ -1,0 +1,329 @@
+====================================! Stateful vs Stateless Chatbot !=======================
+
+=> What is a Stateless Chatbot?
+
+    A Stateless Chatbot treats every user request as a completely new request.
+
+    It does not remember anything from previous conversations.
+
+    Every request is processed independently.
+
+    Example
+
+        User:
+            My name is Vinay.
+
+        AI:
+            Nice to meet you.
+
+        ----------------------------
+
+        User:
+            What is my name?
+
+        AI:
+            I don't know.
+
+    Architecture
+
+            User Prompt
+                  │
+                  ▼
+             Prompt
+                  │
+                  ▼
+                 LLM
+                  │
+                  ▼
+              Response
+
+    Characteristics
+
+        -> No conversation history.
+        -> No memory.
+        -> Every request starts from scratch.
+        -> Simple architecture.
+        -> Faster because no memory lookup is required.
+
+================================================================================
+
+=> What is a Stateful Chatbot?
+
+    A Stateful Chatbot remembers information from previous interactions.
+
+    It maintains a conversation state and uses it while answering future questions.
+
+    Example
+
+        User:
+            My name is Vinay.
+
+        AI:
+            Nice to meet you.
+
+        ----------------------------
+
+        User:
+            What is my name?
+
+        AI:
+            Your name is Vinay.
+
+    Architecture
+
+                User
+                  │
+                  ▼
+          Input Moderation
+                  │
+                  ▼
+         Prompt Template
+                  │
+                  ▼
+        Conversation Chain
+           ▲           ▲
+           │           │
+     Chat Memory   Chat Model
+                  │
+                  ▼
+                 LLM
+                  │
+                  ▼
+              AI Response
+                  │
+                  ▼
+          Update Chat Memory
+
+================================================================================
+
+=> What is "State"?
+
+    State is the information preserved between multiple user requests.
+
+    Examples
+
+        -> Conversation History
+
+        -> User Preferences
+
+        -> Uploaded Files
+
+        -> Chat Memory
+
+        -> Session Information
+
+        -> Previous AI Responses
+
+        -> Runtime Context
+
+    Without state, every request is treated as a new conversation.
+
+================================================================================
+
+=> Why is it called a Stateful Chatbot?
+
+    Because the chatbot remembers previous interactions and uses them while generating future responses.
+
+    The "state" is usually maintained using a Memory component.
+
+    Example
+
+        User:
+            I live in Bangalore.
+
+        AI:
+            Okay.
+
+        ----------------------------
+
+        User:
+            What city do I live in?
+
+        AI:
+            Bangalore.
+
+    Here, the previous conversation becomes part of the chatbot's state.
+
+================================================================================
+
+=> Our Flowise Chatflow (Phase 1)
+
+                User
+                  │
+                  ▼
+      Simple Prompt Moderation
+                  │
+                  ▼
+        Chat Prompt Template
+                  │
+                  ▼
+        Conversation Chain
+           ▲           ▲
+           │           │
+     Buffer Memory  Chat Model
+                  │
+                  ▼
+                 LLM
+                  │
+                  ▼
+              AI Response
+                  │
+                  ▼
+          Buffer Memory Updated
+
+    Explanation
+
+        -> Input Moderation validates the user's prompt.
+
+        -> Chat Prompt Template creates the final prompt.
+
+        -> Conversation Chain combines:
+
+            -> Current Prompt
+            -> Conversation History
+
+        -> Chat Model sends the request to the LLM.
+
+        -> The generated response is stored back into Buffer Memory.
+
+================================================================================
+
+=> Why were the first four Flowise tasks grouped under Stateful Chatbot?
+
+    Task 1
+
+        Conversation Chain
+
+            Introduced the conversation pipeline.
+
+    ------------------------------------------------
+
+    Task 2
+
+        Buffer Memory
+
+            Added memory to the conversation.
+
+            This is where the chatbot actually became stateful.
+
+    ------------------------------------------------
+
+    Task 3
+
+        Prompt Template
+
+            Built dynamic prompts.
+
+            It can also use runtime values such as:
+
+                -> question
+                -> chat_history
+                -> file_attachment
+
+            chat_history comes from the chatbot's state.
+
+    ------------------------------------------------
+
+    Task 4
+
+        Input Moderation
+
+            Validates user input before it reaches the Conversation Chain.
+
+            Although it does not store state, it is part of the same conversational pipeline.
+
+================================================================================
+
+=> Stateless vs Stateful
+
+    Feature                     Stateless               Stateful
+
+    Conversation Memory         No                      Yes
+
+    Previous Context            No                      Yes
+
+    Chat History                No                      Yes
+
+    Prompt Reusability          Limited                 High
+
+    User Personalization        No                      Yes
+
+    Session Awareness           No                      Yes
+
+    Suitable For                One-time Q&A            Chatbots & AI Assistants
+
+    Complexity                  Low                     Medium to High
+
+================================================================================
+
+=> Real-World Examples
+
+    Stateless
+
+        -> Simple FAQ Bot
+
+        -> Calculator
+
+        -> Translation API
+
+        -> Text Summarizer
+
+        -> Single Prompt AI
+
+    Stateful
+
+        -> ChatGPT
+
+        -> Microsoft Copilot
+
+        -> Claude
+
+        -> Gemini
+
+        -> AI Customer Support
+
+        -> Enterprise AI Assistant
+
+        -> AI Coding Assistant
+
+================================================================================
+
+=> Key Takeaway
+
+    Stateless Chatbot
+
+        User Prompt
+              │
+              ▼
+             LLM
+              │
+              ▼
+          Response
+
+        Every request is independent.
+
+    ------------------------------------------------
+
+    Stateful Chatbot
+
+        User Prompt
+              │
+              ▼
+      Input Validation
+              │
+              ▼
+      Prompt Construction
+              │
+              ▼
+      Conversation Memory
+              │
+              ▼
+             LLM
+              │
+              ▼
+      Update Conversation Memory
+              │
+              ▼
+          Response
+
+        The chatbot remembers previous interactions and maintains state across multiple requests.

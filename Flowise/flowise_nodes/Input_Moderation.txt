@@ -1,0 +1,259 @@
+=> Input Moderation
+
+    -> Purpose
+
+        Validates the user's input before sending it to the LLM.
+
+        It helps prevent harmful, restricted, confidential, or unwanted prompts from reaching the AI model.
+
+    -> Types
+
+        -> Simple Prompt Moderation
+
+        -> OpenAI Moderation
+
+================================================================================
+
+    -> Simple Prompt Moderation
+
+        -> Purpose
+
+            Performs rule-based moderation by checking the user's prompt against a configured Deny List.
+
+            If a match is found, the prompt is blocked immediately.
+
+        -> Configuration
+
+            -> Deny List
+
+                List of words or phrases that should be blocked.
+
+                Example:
+
+                    hack
+                    passwords
+                    credit card
+                    kill
+
+            -> Error Message
+
+                Custom message displayed when the prompt is blocked.
+
+                Example:
+
+                    Your prompt contains restricted content.
+                    Please modify your request.
+
+        -> Flow
+
+                User Prompt
+                      │
+                      ▼
+            Simple Prompt Moderation
+                      │
+                      ▼
+            Compare Prompt with Deny List
+                      │
+                ┌─────┴─────┐
+                │           │
+            Match Found   No Match
+                │           │
+                ▼           ▼
+          Return Error   Continue Chatflow
+                          │
+                          ▼
+                     Chat Prompt Template
+                          │
+                          ▼
+                   Conversation Chain
+                          │
+                          ▼
+                         LLM
+
+        -> Example
+
+            Deny List
+
+                hack
+                passwords
+                credit card
+
+            User Prompt
+
+                How to hack a website?
+
+            Result
+
+                Blocked
+
+            --------------------------------------
+
+            User Prompt
+
+                Explain Kafka
+
+            Result
+
+                Allowed
+
+        -> Important
+
+            -> Performs text-based moderation.
+
+            -> Case-insensitive.
+
+                Example
+
+                    passwords
+                    Passwords
+                    PASSWORDS
+
+                All are treated the same.
+
+            -> Searches for configured deny-list entries inside the user's prompt.
+
+            -> Returns the configured Error Message when a match is found.
+
+            -> The LLM is never invoked for blocked prompts.
+
+            -> Does not understand context or meaning.
+
+            -> Does not perform semantic analysis.
+
+            -> Best suited for:
+
+                -> Profanity filtering
+                -> Company-specific keywords
+                -> Confidential terms
+                -> Restricted topics
+                -> Basic keyword filtering
+
+================================================================================
+
+    -> OpenAI Moderation
+
+        -> Purpose
+
+            Uses OpenAI's Moderation API to detect unsafe or policy-violating content using AI.
+
+            Instead of matching keywords, it understands the meaning of the prompt.
+
+        -> Configuration
+
+            -> OpenAI API Key
+
+            -> Moderation Model
+
+            -> Error Message (optional)
+
+        -> Flow
+
+                User Prompt
+                      │
+                      ▼
+              OpenAI Moderation
+                      │
+                      ▼
+            OpenAI Moderation API
+                      │
+                ┌─────┴─────┐
+                │           │
+             Unsafe      Safe
+                │           │
+                ▼           ▼
+          Return Error   Continue Chatflow
+                          │
+                          ▼
+                     Chat Prompt Template
+                          │
+                          ▼
+                   Conversation Chain
+                          │
+                          ▼
+                         LLM
+
+        -> Example
+
+            Prompt
+
+                How can I hack someone's bank account?
+
+            Result
+
+                Blocked
+
+            --------------------------------------
+
+            Prompt
+
+                Explain Spring Boot.
+
+            Result
+
+                Allowed
+
+        -> Important
+
+            -> AI-powered moderation.
+
+            -> Understands the meaning of the prompt.
+
+            -> Can detect harmful content even if banned keywords are not present.
+
+            -> Uses OpenAI's Moderation API.
+
+            -> Requires an additional API request.
+
+            -> More accurate than Simple Prompt Moderation.
+
+            -> Can detect categories such as:
+
+                -> Hate
+                -> Violence
+                -> Self-harm
+                -> Sexual content
+                -> Harassment
+                -> Illegal activities
+
+================================================================================
+
+    -> Comparison
+
+        Feature                     Simple Prompt Moderation      OpenAI Moderation
+
+        Matching Method             Keyword/Phrase               AI Semantic Analysis
+
+        Understands Meaning         No                           Yes
+
+        Case Sensitive              No                           No
+
+        Custom Deny List            Yes                          No
+
+        Requires OpenAI API         No                           Yes
+
+        Additional API Call         No                           Yes
+
+        Speed                       Faster                       Slightly Slower
+
+        Cost                        Free                         Uses OpenAI API
+
+        Best For                    Simple filtering             Production-grade moderation
+
+================================================================================
+
+    -> When to Use
+
+        Simple Prompt Moderation
+
+            -> Block specific words.
+            -> Restrict company keywords.
+            -> Prevent confidential terms.
+            -> Fast local filtering.
+
+        OpenAI Moderation
+
+            -> Public AI applications.
+            -> Enterprise chatbots.
+            -> Production systems.
+            -> Detect unsafe prompts using AI.
+            -> Compliance with OpenAI safety policies.

@@ -1,4 +1,9 @@
-====================================! Task 1: Create our first Chatflow !=======================
+      
+################################################################################
+# Phase 1 : Conversation Chain (Stateful Chatbots)
+################################################################################
+
+====================================! ✅Task 1: Create our first Chatflow !=======================
 
     Objective:
         -> Build a basic AI application by connecting a Chat Prompt Template, Chat Model, and LLM Chain.
@@ -92,7 +97,7 @@
         -> The Chat Model communicates with the selected LLM.
         -> The LLM Chain orchestrates the complete execution flow.
 
-====================================! Task 2: Add Memory to Chatflow !=======================
+====================================! ✅Task 2: Add Memory to Chatflow !=======================
 
     Objective:
 
@@ -204,129 +209,650 @@
         -> Unlike LLM Chain, Conversation Chain supports Memory.
         -> Flowise hides the prompt creation process inside Conversation Chain.
         -> In manual implementation (Spring AI / LangChain4j), we create the Prompt, retrieve Memory, and invoke the Chat Model explicitly.
-        
-====================================! Task 3: Add Output Parser !=======================
+  
+====================================! ✅Task 3: Prompt Templates !=======================
 
     Objective:
 
-        -> Force the LLM to return responses in a predefined format.
-        -> Understand how structured outputs improve application reliability.
+        -> Learn how to create dynamic prompts using variables.
+        -> Build reusable prompts for different user inputs.
 
-====================================! Task 4: Add Prompt Variables !=======================
+    -> Why Prompt Templates?
 
-    Objective:
+        -> In Task 1 and Task 2, we used static prompts.
+        -> Static prompts require manual modification whenever the user input changes.
+        -> This makes the prompt difficult to reuse.
+        -> Prompt Templates solve this problem by introducing Prompt Variables.
+        -> Prompt Variables allow the same prompt to be reused for different user inputs without modifying the prompt itself.
 
-        -> Create dynamic prompts using variables.
-        -> Understand how Prompt Templates become reusable across multiple requests.
+    -> Architecture
 
-====================================! Task 5: Connect Multiple Prompts !=======================
+                    User
+                      │
+                      ▼
+            Runtime Variable (question)
+                      │
+                      ▼
+            Format Prompt Values
+                topic → question
+                      │
+                      ▼
+            Chat Prompt Template
+                Explain {topic}
+                      │
+                      ▼
+            Conversation Chain
+                  ▲           ▲
+                  │           │
+            Chat Model   Buffer Memory
+                      │
+                      ▼
+                 LLM Response
 
-    Objective:
+    -> Components
 
-        -> Learn how prompts can be chained together.
-        -> Understand multi-step prompt execution.
+        -> Chat Prompt Template
 
-====================================! Task 6: Add Moderation !=======================
+            -> Creates a reusable prompt.
+            -> Supports Prompt Variables using {}.
+
+        -> Prompt Variables
+
+            -> Placeholders used inside the prompt.
+            -> Receive values before execution.
+
+            Example:
+
+                Explain {topic}
+
+        -> Format Prompt Values
+
+            -> Maps Prompt Variables to runtime variables or fixed values.
+
+            Example:
+
+                topic → question
+
+        -> Runtime Variables
+
+            -> Flowise provides runtime variables during execution.
+
+            Available runtime variables:
+
+                -> question
+
+                    Current user input from the chat window.
+
+                -> chat_history
+
+                    Previous conversation between the user and AI.
+
+                -> file_attachment
+
+                    Files uploaded by the user.
+
+        -> Conversation Chain
+
+            -> Receives the final prompt after all variables are replaced.
+            -> Sends the prompt to the Chat Model.
+
+        -> Chat Model
+
+            -> Sends the request to the configured LLM.
+            -> Returns the generated response.
+
+    -> Execution Flow
+
+            User enters:
+
+                Kafka
+
+                    ↓
+            Flowise creates runtime variable
+
+                question = "Kafka"
+
+                    ↓
+            Format Prompt Values maps
+
+                topic → question
+
+                    ↓
+            Chat Prompt Template replaces
+
+                Explain {topic}
+
+                    ↓
+
+                Explain Kafka
+
+                    ↓
+            Final Prompt is created
+
+                    ↓
+            Conversation Chain receives the prompt
+
+                    ↓
+            Chat Model invokes the selected LLM
+
+                    ↓
+            LLM generates the response
+
+                    ↓
+            Response is displayed to the user
+
+    -> Current Chatflow
+
+                Chat Prompt Template
+                        │
+                        ▼
+                Conversation Chain
+                  ▲           ▲
+                  │           │
+              Chat Model   Buffer Memory
+
+    -> Difference from Task 2
+
+        Task 2
+
+                Buffer Memory
+                      │
+                      ▼
+            Conversation Chain
+                  ▲
+                  │
+              Chat Model
+
+            -> Focused on remembering previous conversations.
+            -> Prompt was static.
+            -> No Prompt Variables were used.
+
+        Task 3
+
+                User
+                  │
+                  ▼
+            Runtime Variable
+                  │
+                  ▼
+            Format Prompt Values
+                  │
+                  ▼
+            Chat Prompt Template
+                  │
+                  ▼
+            Conversation Chain
+                  ▲           ▲
+                  │           │
+              Chat Model   Buffer Memory
+
+            -> Prompt became dynamic.
+            -> Prompt Variables were introduced.
+            -> Same prompt can be reused for different user inputs.
+            -> Variables are replaced before sending the prompt to the LLM.
+
+    -> Important
+
+        -> Prompt Variables are written inside {}.
+
+            Example:
+
+                {topic}
+                {language}
+                {difficulty}
+
+        -> Every Prompt Variable must receive a value before execution.
+
+        -> Prompt Variables can receive:
+
+            -> Fixed values
+            -> Runtime variables
+
+        -> Runtime variables available in our Flowise version are:
+
+            -> question
+            -> chat_history
+            -> file_attachment
+
+        -> Example Mapping
+
+            Prompt:
+
+                Explain {topic}
+
+            Mapping:
+
+                topic → question
+
+            User Input:
+
+                Kafka
+
+            Final Prompt:
+
+                Explain Kafka
+
+        -> If a Prompt Variable is not assigned, Flowise throws an error.
+
+            Example:
+
+                Missing value for input variable topic
+
+        -> Variable replacement happens before the prompt is sent to the Conversation Chain.
+
+        -> Prompt Templates work with both Conversation Chain and LLM Chain.
+
+        -> Prompt Templates improve prompt reusability by separating the prompt structure from the runtime data.
+
+====================================! ✅Task 4: Input Moderation !=======================
 
     Objective:
 
         -> Validate user input before sending it to the LLM.
-        -> Prevent harmful or restricted requests.
+        -> Prevent harmful or restricted prompts.
 
-====================================! Task 7: Load External Documents !=======================
+    -> Why Input Moderation?
+
+        -> LLMs process every prompt they receive.
+        -> Some prompts may contain harmful, confidential, or restricted content.
+        -> Input Moderation acts as the first layer of validation before the prompt reaches the LLM.
+        -> It improves security, prevents misuse, and reduces unnecessary LLM API calls.
+
+    -> Types
+
+        -> Simple Prompt Moderation
+
+            Performs rule-based moderation using a configured Deny List.
+
+        -> OpenAI Moderation
+
+            Performs AI-powered moderation using OpenAI's Moderation API.
+
+    -> Architecture
+
+                    User
+                      │
+                      ▼
+            Simple Prompt Moderation
+                      │
+                ┌─────┴─────┐
+                │           │
+            Match Found   No Match
+                │           │
+                ▼           ▼
+          Return Error   Chat Prompt Template
+                              │
+                              ▼
+                      Conversation Chain
+                        ▲            ▲
+                        │            │
+                   Chat Model   Buffer Memory
+                              │
+                              ▼
+                             LLM
+
+    -> Components
+
+        -> Simple Prompt Moderation
+
+            -> Checks the user's prompt against a configured Deny List.
+            -> Blocks the prompt if a match is found.
+            -> Returns the configured Error Message.
+            -> Does not invoke the LLM for blocked prompts.
+
+        -> Deny List
+
+            Contains restricted words or phrases.
+
+            Example:
+
+                hack
+                passwords
+                credit card
+                kill
+
+        -> Error Message
+
+            Message returned when moderation blocks the prompt.
+
+            Example:
+
+                Your prompt contains restricted content.
+                Please modify your request.
+
+        -> Chat Prompt Template
+
+            Receives the prompt only if moderation is successful.
+
+        -> Conversation Chain
+
+            Processes only validated prompts.
+
+        -> Chat Model
+
+            Sends the validated prompt to the configured LLM.
+
+    -> Execution Flow
+
+            User enters a prompt
+
+                    ↓
+            Simple Prompt Moderation
+
+                    ↓
+            Compare with Deny List
+
+                    ↓
+
+            Match Found?
+
+                Yes
+                    ↓
+                Return Error Message
+
+                No
+                    ↓
+                Continue Chatflow
+
+                    ↓
+            Chat Prompt Template
+
+                    ↓
+            Conversation Chain
+
+                    ↓
+            Chat Model
+
+                    ↓
+                 LLM Response
+
+    -> Test Cases
+
+        Test 1
+
+            Deny List
+
+                hack
+
+            User Prompt
+
+                How to hack a website?
+
+            Result
+
+                Blocked
+
+        ------------------------------------------------
+
+        Test 2
+
+            Deny List
+
+                passwords
+
+            User Prompt
+
+                Tell me about password.
+
+            Result
+
+                Allowed
+
+            Reason
+
+                "password" and "passwords" are different text.
+
+        ------------------------------------------------
+
+        Test 3
+
+            Deny List
+
+                passwords
+
+            User Prompt
+
+                Tell me about passwords.
+
+            Result
+
+                Blocked
+
+        ------------------------------------------------
+
+        Test 4
+
+            Deny List
+
+                passwords
+
+            User Prompt
+
+                Tell me about Passwords.
+
+            Result
+
+                Blocked
+
+            Reason
+
+                Matching is case-insensitive.
+
+        ------------------------------------------------
+
+        Test 5
+
+            Deny List
+
+                credit card
+
+            User Prompt
+
+                My credit-card was stolen.
+
+            Result
+
+                Allowed
+
+            Reason
+
+                The configured phrase was not found exactly due to the hyphen.
+
+    -> Current Chatflow
+
+            Simple Prompt Moderation
+                        │
+                        ▼
+                Chat Prompt Template
+                        │
+                        ▼
+                Conversation Chain
+                  ▲            ▲
+                  │            │
+              Chat Model   Buffer Memory
+
+    -> Difference from Task 3
+
+        Task 3
+
+            -> Focused on creating dynamic prompts.
+            -> Introduced Prompt Variables.
+            -> Prompt was always forwarded to the LLM.
+
+        Task 4
+
+            -> Focused on validating the user's input.
+            -> Prompt may be blocked before reaching the LLM.
+            -> Adds a security layer before prompt execution.
+
+    -> Important
+
+        -> Input Moderation executes before the prompt reaches the LLM.
+
+        -> Simple Prompt Moderation performs rule-based text matching.
+
+        -> Matching is case-insensitive.
+
+        -> If a deny-list entry is found, the prompt is blocked immediately.
+
+        -> The configured Error Message is returned to the user.
+
+        -> Blocked prompts never reach the Chat Prompt Template, Conversation Chain, or LLM.
+
+        -> Simple Prompt Moderation does not understand context or meaning.
+
+        -> It is best suited for:
+
+            -> Profanity filtering
+            -> Company-specific keywords
+            -> Confidential information
+            -> Restricted topics
+            -> Basic keyword filtering
+
+        -> For semantic or AI-powered moderation, OpenAI Moderation should be used instead.
+
+
+################################################################################
+# Phase 2 : LLM Chain (Stateless Building Blocks)
+################################################################################
+
+====================================! Task 5: Structured Output Parser !=======================
 
     Objective:
 
-        -> Read documents such as PDF, DOCX, TXT, or CSV.
-        -> Understand how AI applications ingest external knowledge.
+        -> Force the LLM to return responses in a predefined JSON structure.
+        -> Understand how structured outputs improve application reliability.
 
-====================================! Task 8: Split Documents !=======================
+====================================! Task 6: Advanced Structured Output Parser !=======================
 
     Objective:
 
-        -> Split large documents into smaller chunks.
-        -> Understand why chunking is essential for embeddings and RAG.
+        -> Validate LLM responses using a strict schema.
+        -> Ensure the generated output always follows the expected data structure.
 
-====================================! Task 9: Generate Embeddings !=======================
+====================================! Task 7: Custom List Output Parser !=======================
+
+    Objective:
+
+        -> Force the LLM to return only a list of values.
+        -> Understand list-based outputs.
+
+====================================! Task 8: CSV Output Parser !=======================
+
+    Objective:
+
+        -> Force the LLM to return responses in CSV format.
+        -> Generate report-ready tabular data.
+
+
+################################################################################
+# Phase 3 : RAG Pipeline
+################################################################################
+
+====================================! Task 9: Load External Documents !=======================
+
+    Objective:
+
+        -> Read documents such as PDF, DOCX, TXT and CSV.
+        -> Understand document ingestion.
+
+====================================! Task 10: Split Documents !=======================
+
+    Objective:
+
+        -> Split documents into chunks.
+        -> Understand why chunking is required.
+
+====================================! Task 11: Generate Embeddings !=======================
 
     Objective:
 
         -> Convert text into vector representations.
-        -> Understand how semantic search works.
+        -> Understand semantic similarity.
 
-====================================! Task 10: Store Embeddings in Vector Database !=======================
-
-    Objective:
-
-        -> Store document embeddings inside a Vector Store.
-        -> Understand vector indexing and similarity search.
-
-====================================! Task 11: Build our First RAG Application !=======================
+====================================! Task 12: Store Embeddings in Vector Database !=======================
 
     Objective:
 
-        -> Retrieve relevant information from the Vector Database.
-        -> Generate answers grounded in external knowledge.
+        -> Store embeddings inside a Vector Store.
+        -> Understand vector indexing.
 
-====================================! Task 12: Add Conversation Memory to RAG !=======================
-
-    Objective:
-
-        -> Combine document retrieval with conversational memory.
-        -> Build a context-aware RAG chatbot.
-
-====================================! Task 13: Add Tools !=======================
+====================================! Task 13: Build our First RAG Application !=======================
 
     Objective:
 
-        -> Enable the AI to use external tools.
-        -> Understand how LLMs interact with APIs and external systems.
+        -> Retrieve relevant chunks from the Vector Database.
+        -> Generate grounded responses.
 
-====================================! Task 14: MCP Integration !=======================
+====================================! Task 14: Add Conversation Memory to RAG !=======================
 
     Objective:
 
-        -> Connect AI applications with MCP servers.
+        -> Combine RAG with conversational memory.
+        -> Build a context-aware chatbot.
+
+
+################################################################################
+# Phase 4 : AI Agents
+################################################################################
+
+====================================! Task 15: Add Tools !=======================
+
+    Objective:
+
+        -> Enable the LLM to invoke external tools.
+        -> Understand tool calling.
+
+====================================! Task 16: MCP Integration !=======================
+
+    Objective:
+
+        -> Connect AI applications with MCP Servers.
         -> Understand standardized tool communication.
 
-====================================! Task 15: Build our First AI Agent !=======================
+====================================! Task 17: Build our First AI Agent !=======================
 
     Objective:
 
-        -> Create an autonomous AI Agent capable of reasoning and tool usage.
-        -> Understand the difference between Chatflow and AI Agents.
+        -> Create an autonomous AI Agent.
+        -> Understand agent reasoning and planning.
 
-====================================! Task 16: Multi-Tool AI Agent !=======================
+====================================! Task 18: Multi-Tool AI Agent !=======================
 
     Objective:
 
-        -> Enable an AI Agent to select and use multiple tools dynamically.
-        -> Understand agent planning and tool selection.
+        -> Enable an AI Agent to dynamically select multiple tools.
+        -> Understand tool orchestration.
 
-====================================! Task 17: Multi-Agent Workflow !=======================
+====================================! Task 19: Multi-Agent Workflow !=======================
 
     Objective:
 
         -> Build applications using multiple collaborating AI Agents.
-        -> Understand agent orchestration and task delegation.
+        -> Understand agent delegation.
 
-====================================! Task 18: Human-in-the-Loop !=======================
+====================================! Task 20: Human-in-the-Loop !=======================
 
     Objective:
 
         -> Introduce manual approval into AI workflows.
-        -> Understand where human intervention is required.
+        -> Understand human intervention.
 
-====================================! Task 19: Build End-to-End Production AI Application !=======================
+
+################################################################################
+# Phase 5 : Production AI Application
+################################################################################
+
+====================================! Task 21: Build End-to-End Production AI Application !=======================
 
     Objective:
 
-        -> Combine Memory, RAG, Tools, MCP, and AI Agents.
-        -> Build a complete production-grade AI application in Flowise.
+        -> Combine Memory, RAG, Tools, MCP and AI Agents.
+        -> Build a production-grade AI application.
 
-====================================! Task 20: Manual Implementation !=======================
+====================================! Task 22: Manual Implementation !=======================
 
     Objective:
 
         -> Implement the complete application manually using Spring AI and LangChain4j.
-        -> Understand how every Flowise component maps to production Java code.
+        -> Map every Flowise component to production-ready Java code.

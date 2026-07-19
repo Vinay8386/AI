@@ -2,42 +2,330 @@
 
     -> Purpose
 
-        -> Creates the final prompt that will be sent to the LLM.
-        -> Combines the System Message and Human Message into a single prompt.
-        -> It does not communicate with the LLM directly.
+        Creates the final prompt by combining:
 
-    -> Components
+            -> System Message
+            -> Human Message
+            -> Prompt Variables
+            -> Runtime Values
+
+        It allows us to create reusable and dynamic prompts instead of writing a new prompt for every request.
+
+    -> Configuration
 
         -> System Message
 
-            -> Defines the behavior or personality of the AI.
+            Defines the role, behaviour, and instructions for the AI.
 
-            -> Examples
+            Example:
 
-                -> You are a Java Expert.
-                -> Answer only in JSON.
-                -> You are a Travel Assistant.
+                You are an expert Java trainer.
+                Always explain in simple English with one example.
 
         -> Human Message
 
-            -> Represents the user's actual input.
+            Contains the actual user request.
 
-            -> Examples
+            It supports dynamic variables using {}.
 
-                -> What is Spring Boot?
-                -> Explain Docker Volumes.
+            Example:
+
+                Explain {topic}
+
+            Here:
+
+                topic is a Prompt Variable.
+
+        -> Format Prompt Values
+
+            Used to provide values for the Prompt Variables used inside the prompt.
+
+            Example Prompt:
+
+                Explain {topic}
+
+            Flowise detects:
+
+                topic
+
+            Then we must assign a value to topic.
+
+            The value can be:
+
+                -> A fixed value
+                -> A Flowise runtime variable
+
+            Example with fixed value:
+
+                topic = Kafka
+
+            Final Prompt:
+
+                Explain Kafka
+
+            Example with runtime variable:
+
+                topic = question
+
+            If the user enters:
+
+                Spring Boot
+
+            Final Prompt:
+
+                Explain Spring Boot
+
+            Flowise provides the following runtime variables:
+
+                1. question
+
+                    Purpose:
+
+                        Contains the current input entered by the user in the chat window.
+
+                    Example:
+
+                        User Input:
+
+                            Kafka
+
+                        Mapping:
+
+                            topic -> question
+
+                        Prompt Template:
+
+                            Explain {topic}
+
+                        Final Prompt:
+
+                            Explain Kafka
+
+                    Important:
+
+                        question changes for every user request.
+
+                2. chat_history
+
+                    Purpose:
+
+                        Contains the previous conversation between the user and the AI.
+
+                    Example:
+
+                        Previous Conversation:
+
+                            User: My name is Vinay.
+                            AI: Nice to meet you, Vinay.
+
+                        Prompt Template:
+
+                            Previous Conversation:
+
+                            {history}
+
+                            Current Question:
+
+                            {question}
+
+                        Mapping:
+
+                            history -> chat_history
+                            question -> question
+
+                        Final Prompt:
+
+                            Previous Conversation:
+
+                            User: My name is Vinay.
+                            AI: Nice to meet you, Vinay.
+
+                            Current Question:
+
+                            What is my name?
+
+                    Important:
+
+                        chat_history is mainly used when previous conversation context must be explicitly included in the prompt.
+
+                        Conversation Chain can also manage conversation history internally using Memory.
+
+                3. file_attachment
+
+                    Purpose:
+
+                        Contains the file uploaded by the user through the chat window.
+
+                    Example:
+
+                        User uploads:
+
+                            employee-policy.pdf
+
+                        Prompt Template:
+
+                            Read the following uploaded file:
+
+                            {document}
+
+                            Answer the user's question:
+
+                            {question}
+
+                        Mapping:
+
+                            document -> file_attachment
+                            question -> question
+
+                    Final Prompt Conceptually Contains:
+
+                        Uploaded file content or file reference
+
+                        +
+
+                        Current user question
+
+                    Important:
+
+                        file_attachment is available only when file upload is enabled in the Chatflow configuration.
+
+        -> Additional Parameters
+
+            Used to configure additional settings supported by the Chat Prompt Template node.
 
     -> Flow
 
-            System Message
-                    +
-            Human Message
+            User enters:
+
+                Kafka
+
                     ↓
-            Final Prompt
+            Flowise creates runtime value:
+
+                question = "Kafka"
+
                     ↓
-            Send to LLM Chain
+            Format Prompt Values maps:
+
+                topic -> question
+
+                    ↓
+            Prompt Template:
+
+                Explain {topic}
+
+                    ↓
+            Variable Replacement:
+
+                Explain Kafka
+
+                    ↓
+            Final Prompt is created
+
+                    ↓
+            Final Prompt is sent to:
+
+                -> Conversation Chain
+
+                    or
+
+                -> LLM Chain
+
+                    ↓
+            Chat Model sends the request to the LLM
+
+                    ↓
+            LLM generates the response
+
+    -> Complete Example
+
+        System Message:
+
+            You are an expert Java trainer.
+            Always explain in simple English with one example.
+
+        Human Message:
+
+            Explain {topic}
+
+        Format Prompt Values:
+
+            topic -> question
+
+        User Input:
+
+            Kafka
+
+        Final Prompt:
+
+            System Message:
+
+                You are an expert Java trainer.
+                Always explain in simple English with one example.
+
+            Human Message:
+
+                Explain Kafka
 
     -> Important
 
-        -> The Prompt Template only prepares the prompt.
-        -> It never communicates directly with the LLM.
+        -> Variables written inside {} are called Prompt Variables.
+
+        -> Example:
+
+            {topic}
+            {language}
+            {difficulty}
+
+        -> Every Prompt Variable must receive a value before execution.
+
+        -> If a variable is not assigned, Flowise throws an error.
+
+            Example:
+
+                Missing value for input variable topic
+
+        -> Prompt Variables can receive:
+
+            -> Fixed values
+            -> Runtime values
+
+        -> Available runtime values seen in our Flowise version are:
+
+            -> question
+            -> chat_history
+            -> file_attachment
+
+        -> question contains the current user input.
+
+        -> chat_history contains the previous user and AI conversation.
+
+        -> file_attachment contains the file uploaded from the chat window.
+
+        -> Prompt Variables and runtime variables are different.
+
+            Prompt Variable:
+
+                topic
+
+            Runtime Variable:
+
+                question
+
+            Mapping:
+
+                topic -> question
+
+        -> Flowise performs variable replacement before sending the prompt to the LLM.
+
+        -> Prompt Template can be used with both:
+
+            -> LLM Chain
+            -> Conversation Chain
+
+        -> In our Task 3 Chatflow, we used:
+
+            topic -> question
+
+        -> This allowed the same Prompt Template to work with different user inputs without editing the prompt every time.
+        

@@ -54,32 +54,62 @@
     -> Purpose
 
         -> Creates the final prompt before sending it to the LLM.
-        -> Combines the System Message and Human Message.
+        -> Combines the System Message, Human Message, and Prompt Variables.
+        -> Supports reusable and dynamic prompts.
 
     -> Flowise
 
         Chat Prompt Template Node
 
+        -> Supports Prompt Variables using {}.
+        -> Uses Format Prompt Values to assign values to Prompt Variables.
+        -> Automatically replaces Prompt Variables before sending the final prompt to the LLM.
+
     -> Spring AI
 
-        Prompt
+        PromptTemplate
+
+        -> Defines a reusable prompt.
+        -> Uses placeholders like {topic}.
+        -> Variables are supplied using a Map before creating the final Prompt.
 
     -> LangChain4j
 
         PromptTemplate
 
+        -> Defines a reusable prompt.
+        -> Uses placeholders like {{topic}}.
+        -> Variables are supplied before generating the final prompt.
+
     -> Mapping
 
         Flowise Chat Prompt Template
                     ⇔
-        Spring AI Prompt
+        Spring AI PromptTemplate
                     ⇔
         LangChain4j PromptTemplate
+
+    -> Example
+
+        Prompt Template
+
+            Explain {topic}
+
+        Variable Mapping
+
+            topic = Kafka
+
+        Final Prompt
+
+            Explain Kafka
 
     -> Important
 
         -> Flowise creates the prompt visually.
-        -> Manual implementation creates the same prompt in code before invoking the Chat Model.
+        -> Spring AI and LangChain4j create the same prompt programmatically.
+        -> Prompt Variables make prompts reusable.
+        -> Flowise automatically replaces Prompt Variables using Format Prompt Values.
+        -> Spring AI and LangChain4j require developers to explicitly provide variable values before invoking the Chat Model.
 
 => LLM Chain
 
@@ -271,3 +301,121 @@
         -> Unlike LLM Chain, it supports Memory.
         -> It hides the complete orchestration from the developer.
         -> If we implement it manually, we need to explicitly manage PromptTemplate, ChatMemory and ChatClient.
+
+=> Input Moderation
+
+    -> Purpose
+
+        Validates the user's input before sending it to the LLM.
+
+        Prevents harmful, restricted, or unwanted prompts from reaching the AI model.
+
+    -> Flowise
+
+        Simple Prompt Moderation
+
+            -> Uses a configurable Deny List.
+            -> Performs rule-based text matching.
+            -> Blocks the prompt before invoking the LLM.
+            -> Returns a custom Error Message.
+
+        OpenAI Moderation
+
+            -> Uses OpenAI's Moderation API.
+            -> Performs AI-powered semantic moderation.
+            -> Blocks unsafe prompts before invoking the LLM.
+
+    -> Spring AI
+
+        No dedicated Input Moderation component.
+
+        Manual implementation is required.
+
+        Common approaches:
+
+            -> Spring Filter
+            -> HandlerInterceptor
+            -> Controller Validation
+            -> Service Layer Validation
+            -> OpenAI Moderation API integration
+
+    -> LangChain4j
+
+        No dedicated Input Moderation component.
+
+        Manual implementation is required.
+
+        Common approaches:
+
+            -> Validate user input before calling ChatModel.generate()
+
+            -> OpenAI Moderation API
+
+            -> Custom validation logic
+
+    -> Mapping
+
+        Flowise Simple Prompt Moderation
+                    ⇔
+        Spring Boot Filter / Interceptor / Validation
+                    ⇔
+        LangChain4j Manual Validation
+
+        ------------------------------------------------
+
+        Flowise OpenAI Moderation
+                    ⇔
+        Spring AI OpenAI Moderation API
+                    ⇔
+        LangChain4j OpenAI Moderation API
+
+    -> Internal Working
+
+            User Prompt
+                    ↓
+            Input Validation
+                    ↓
+            Prompt Allowed?
+
+                No
+                    ↓
+                Return Error
+
+                Yes
+                    ↓
+                Prompt Template
+                    ↓
+                Chat Model
+                    ↓
+                LLM
+
+    -> Example
+
+        Deny List
+
+            hack
+            passwords
+            credit card
+
+        User Prompt
+
+            How to hack a website?
+
+        Result
+
+            Prompt blocked before reaching the LLM.
+
+    -> Important
+
+        -> Flowise provides Input Moderation as a ready-to-use node.
+
+        -> Spring AI and LangChain4j require developers to implement the validation logic manually.
+
+        -> Simple Prompt Moderation is rule-based.
+
+        -> OpenAI Moderation is AI-powered and understands the meaning of the prompt.
+
+        -> Input Moderation should always execute before Prompt Template creation and LLM invocation.
+
+        -> In production systems, Input Moderation is commonly implemented as middleware or request validation to ensure only safe prompts are processed.
+
